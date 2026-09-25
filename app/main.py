@@ -5,7 +5,7 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.params import Query
 from fastapi.responses import JSONResponse
-from app.models.Product import Product, ProductCategory, ProductCreate
+from app.models.Product import Product, ProductCategory, ProductCreate, ProductSell
 
 
 app = FastAPI(title="Product API", version="0.1.0")
@@ -18,6 +18,7 @@ VALIDATION_MESSAGES = {
     "price": "ราคาต้องมากกว่า 0",
     "stock": "จำนวนสินค้าไม่ต้องติดลบ",
     "category": "หมวดหมู่สินค้าไม่ถูกต้อง",
+    "quantity": "จำนวนที่ต้องการขายต้องมากกว่า 0",
 }
 
 # Accept the Thai query value used by the public API while storage uses "Food".
@@ -98,6 +99,24 @@ def create_product(payload: ProductCreate) -> Product:
         **payload.model_dump(),
     )
     products.append(product)
+    return product
+
+
+@app.post("/api/products/sell", response_model=Product)
+def sell_product(payload: ProductSell) -> Product:
+    """Sell units only when the requested product has sufficient stock."""
+    product = next((item for item in products if item.id == payload.product_id), None)
+    if product is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+        )
+
+    if product.stock < payload.quantity:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient stock"
+        )
+
+    product.stock -= payload.quantity
     return product
 
 

@@ -33,3 +33,10 @@ class ProductCreate(BaseModel):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("must not be blank")
         return value.strip()
+
+
+class ProductSell(BaseModel):
+    """Input used to sell units of an existing product."""
+
+    product_id: int = Field(alias="productId", ge=1, examples=[1])
+    quantity: int = Field(gt=0, examples=[2])

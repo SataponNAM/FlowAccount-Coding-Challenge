@@ -19,6 +19,7 @@ Open `http://127.0.0.1:8000/docs` for the interactive API documentation.
 - `GET /api/products` — all products; add `?category=อาหาร` to filter by category
 - `GET /products/{product_id}` — one product by sequential ID
 - `POST /api/products` — validate and add a product
+- `POST /api/products/sell` — sell product units and reduce stock
 
 Each product has `name`, `sku`, `price`, `stock`, `category`, and `created_at` (plus a sequential numeric `id` for lookup).
 
